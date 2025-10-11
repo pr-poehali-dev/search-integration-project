@@ -1,0 +1,28 @@
+{
+  "tests": [
+    {
+      "name": "Test proxy without parameters",
+      "method": "GET",
+      "path": "/?url=https://example.com",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Test proxy with VPN enabled",
+      "method": "GET",
+      "path": "/?url=https://example.com&vpn=true",
+      "expectedStatus": 200,
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Test proxy with incognito mode",
+      "method": "GET",
+      "path": "/?url=https://example.com&incognito=true",
+      "expectedStatus": 200,
+      "bodyMatcher": "partial"
+    }
+  ]
+}

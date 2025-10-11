@@ -47,6 +47,9 @@ export default function Index() {
   const [vpn, setVpn] = useState(false);
   const [language, setLanguage] = useState<Language>('ru');
   const [showIframe, setShowIframe] = useState(false);
+  const [proxyUrl, setProxyUrl] = useState('');
+
+  const PROXY_API = 'https://functions.poehali.dev/2b6f40ac-fb5f-4ef4-8d2d-c21af8c88414';
 
   const t = translations[language];
 
@@ -88,12 +91,23 @@ export default function Index() {
     }
     
     setCurrentUrl(url);
+    
+    const params = new URLSearchParams();
+    params.set('url', url);
+    if (vpn) params.set('vpn', 'true');
+    if (incognito) params.set('incognito', 'true');
+    
+    const finalUrl = `${PROXY_API}?${params.toString()}`;
+    setProxyUrl(finalUrl);
   };
 
   const handleClose = () => {
     playClickSound();
     setShowIframe(false);
-    setTimeout(() => setCurrentUrl(''), 300);
+    setTimeout(() => {
+      setCurrentUrl('');
+      setProxyUrl('');
+    }, 300);
   };
 
   return (
@@ -142,7 +156,10 @@ export default function Index() {
                   <Switch
                     id="incognito"
                     checked={incognito}
-                    onCheckedChange={setIncognito}
+                    onCheckedChange={(checked) => {
+                      playClickSound();
+                      setIncognito(checked);
+                    }}
                   />
                 </div>
 
@@ -156,7 +173,10 @@ export default function Index() {
                   <Switch
                     id="adblock"
                     checked={adBlock}
-                    onCheckedChange={setAdBlock}
+                    onCheckedChange={(checked) => {
+                      playClickSound();
+                      setAdBlock(checked);
+                    }}
                   />
                 </div>
 
@@ -170,7 +190,10 @@ export default function Index() {
                   <Switch
                     id="vpn"
                     checked={vpn}
-                    onCheckedChange={setVpn}
+                    onCheckedChange={(checked) => {
+                      playClickSound();
+                      setVpn(checked);
+                    }}
                   />
                 </div>
 
@@ -236,9 +259,11 @@ export default function Index() {
                 <Icon name="X" size={20} />
               </Button>
               <span className="text-sm text-gray-400">{currentUrl}</span>
+              {vpn && <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">🇨🇦 VPN</span>}
+              {incognito && <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">🕶️ Incognito</span>}
             </div>
             <iframe
-              src={currentUrl}
+              src={proxyUrl || currentUrl}
               className="w-full bg-white"
               style={{ height: 'calc(100vh - 200px)' }}
               sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
