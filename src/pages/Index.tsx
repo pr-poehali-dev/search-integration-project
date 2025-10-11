@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -46,11 +46,40 @@ export default function Index() {
   const [adBlock, setAdBlock] = useState(false);
   const [vpn, setVpn] = useState(false);
   const [language, setLanguage] = useState<Language>('ru');
+  const [showIframe, setShowIframe] = useState(false);
 
   const t = translations[language];
 
+  const playClickSound = () => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+  };
+
+  useEffect(() => {
+    if (currentUrl) {
+      setShowIframe(true);
+    } else {
+      setShowIframe(false);
+    }
+  }, [currentUrl]);
+
   const handleSearch = () => {
     if (!searchQuery.trim()) return;
+    
+    playClickSound();
     
     let url = searchQuery.trim();
     
@@ -59,6 +88,12 @@ export default function Index() {
     }
     
     setCurrentUrl(url);
+  };
+
+  const handleClose = () => {
+    playClickSound();
+    setShowIframe(false);
+    setTimeout(() => setCurrentUrl(''), 300);
   };
 
   return (
@@ -75,7 +110,7 @@ export default function Index() {
             />
             <Button
               onClick={handleSearch}
-              className="bg-[#3b82f6] hover:bg-[#2563eb] h-12 px-6"
+              className="bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] hover:from-[#2563eb] hover:to-[#7c3aed] h-12 px-6 transition-all duration-300 active:scale-95"
             >
               <Icon name="Globe" size={20} />
             </Button>
@@ -83,7 +118,12 @@ export default function Index() {
 
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="hover:bg-[#2d2d2d]">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="hover:bg-gradient-to-r hover:from-[#3b82f6]/20 hover:to-[#8b5cf6]/20 transition-all duration-300 active:scale-95"
+                onClick={playClickSound}
+              >
                 <Icon name="Settings" size={24} />
               </Button>
             </SheetTrigger>
@@ -138,36 +178,36 @@ export default function Index() {
                   <Label className="text-white mb-3 block">{t.language}</Label>
                   <div className="space-y-2">
                     <Button
-                      onClick={() => setLanguage('en')}
+                      onClick={() => { playClickSound(); setLanguage('en'); }}
                       variant={language === 'en' ? 'default' : 'ghost'}
-                      className={`w-full justify-start gap-3 ${
+                      className={`w-full justify-start gap-3 transition-all duration-300 active:scale-95 ${
                         language === 'en'
-                          ? 'bg-[#3b82f6] hover:bg-[#2563eb]'
-                          : 'hover:bg-[#2d2d2d]'
+                          ? 'bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] hover:from-[#2563eb] hover:to-[#7c3aed]'
+                          : 'hover:bg-gradient-to-r hover:from-[#3b82f6]/20 hover:to-[#8b5cf6]/20'
                       }`}
                     >
                       <span className="text-2xl">🇺🇸</span>
                       <span>English</span>
                     </Button>
                     <Button
-                      onClick={() => setLanguage('ru')}
+                      onClick={() => { playClickSound(); setLanguage('ru'); }}
                       variant={language === 'ru' ? 'default' : 'ghost'}
-                      className={`w-full justify-start gap-3 ${
+                      className={`w-full justify-start gap-3 transition-all duration-300 active:scale-95 ${
                         language === 'ru'
-                          ? 'bg-[#3b82f6] hover:bg-[#2563eb]'
-                          : 'hover:bg-[#2d2d2d]'
+                          ? 'bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] hover:from-[#2563eb] hover:to-[#7c3aed]'
+                          : 'hover:bg-gradient-to-r hover:from-[#3b82f6]/20 hover:to-[#8b5cf6]/20'
                       }`}
                     >
                       <span className="text-2xl">🇷🇺</span>
                       <span>Русский</span>
                     </Button>
                     <Button
-                      onClick={() => setLanguage('ar')}
+                      onClick={() => { playClickSound(); setLanguage('ar'); }}
                       variant={language === 'ar' ? 'default' : 'ghost'}
-                      className={`w-full justify-start gap-3 ${
+                      className={`w-full justify-start gap-3 transition-all duration-300 active:scale-95 ${
                         language === 'ar'
-                          ? 'bg-[#3b82f6] hover:bg-[#2563eb]'
-                          : 'hover:bg-[#2d2d2d]'
+                          ? 'bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] hover:from-[#2563eb] hover:to-[#7c3aed]'
+                          : 'hover:bg-gradient-to-r hover:from-[#3b82f6]/20 hover:to-[#8b5cf6]/20'
                       }`}
                     >
                       <span className="text-2xl">🇸🇦</span>
@@ -183,13 +223,15 @@ export default function Index() {
 
       <main className="flex-1 p-4 max-w-7xl mx-auto w-full">
         {currentUrl && (
-          <div className="mt-4 rounded-lg overflow-hidden border border-[#2d2d2d]">
-            <div className="bg-[#2d2d2d] p-3 flex items-center gap-3">
+          <div className={`mt-4 rounded-lg overflow-hidden border border-[#2d2d2d] transition-all duration-300 ${
+            showIframe ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}>
+            <div className="bg-gradient-to-r from-[#2d2d2d] to-[#3d3d3d] p-3 flex items-center gap-3">
               <Button
-                onClick={() => setCurrentUrl('')}
+                onClick={handleClose}
                 variant="ghost"
                 size="icon"
-                className="hover:bg-[#3d3d3d]"
+                className="hover:bg-gradient-to-r hover:from-red-500/20 hover:to-red-600/20 transition-all duration-300 active:scale-95"
               >
                 <Icon name="X" size={20} />
               </Button>
@@ -206,8 +248,8 @@ export default function Index() {
         )}
 
         {!currentUrl && (
-          <div className="flex flex-col items-center justify-center min-h-[60vh]">
-            <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] bg-clip-text text-transparent">anonykeys</h1>
+          <div className="flex flex-col items-center justify-center min-h-[60vh] animate-fade-in">
+            <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] bg-clip-text text-transparent animate-pulse">anonykeys</h1>
             <Icon name="Globe" size={80} className="text-gray-600 mb-4" />
             <p className="text-gray-400 text-lg">{t.search}</p>
           </div>
